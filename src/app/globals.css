@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #07110f;
+  --ink: #e8f3ee;
+  --muted: #8aa89a;
+  --line: #1c3a32;
+  --gold: #e2b15a;
+  --teal: #3dcc9a;
+  --danger: #ff6b5a;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Segoe UI", "Noto Sans", system-ui, sans-serif;
+}
+
+.map-root { height: 100%; width: 100%; background: #0a1c16; }
+.leaflet-container { background: #0a1c16; font-family: inherit; }
+.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+  background: #10241c;
+  color: #e8f3ee;
+  border: 1px solid #1c3a32;
+}
+
+.grid-bg {
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(61, 204, 154, 0.12), transparent 50%),
+    radial-gradient(ellipse at 90% 100%, rgba(226, 177, 90, 0.08), transparent 40%),
+    linear-gradient(#0a1814, #07110f);
+}
+
+.card {
+  background: linear-gradient(180deg, rgba(16, 40, 32, 0.9), rgba(10, 26, 22, 0.95));
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.kpi { padding: 16px 18px; }
+.pill {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-weight: 600;
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: #234838; border-radius: 8px; }
