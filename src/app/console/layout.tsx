@@ -5,13 +5,15 @@ import { Sidebar } from "@/components/Sidebar";
 import { Topbar } from "@/components/Topbar";
 import { useEffect } from "react";
 import { useStore } from "@/lib/store";
-import type { Role } from "@/lib/types";
+import { api } from "@/lib/api";
 
 function RoleHydrate() {
   const { setRole } = useStore();
   useEffect(() => {
-    const r = sessionStorage.getItem("ner-role") as Role | null;
-    if (r) setRole(r);
+    void api<{ user: { role: string } }>("/auth/me").then(({ user }) => {
+      const role = user.role === "ADMIN" ? "command" : user.role === "LOGISTICS_OPERATOR" ? "logistics" : user.role === "EMERGENCY_OFFICER" ? "state" : "field";
+      setRole(role);
+    });
   }, [setRole]);
   return null;
 }

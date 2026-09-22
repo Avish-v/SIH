@@ -10,6 +10,9 @@ import {
   Truck,
   ClipboardPen,
   BarChart3,
+  Bot,
+  Gauge,
+  HeartPulse,
 } from "lucide-react";
 import { STRINGS } from "@/lib/i18n";
 import { useStore } from "@/lib/store";
@@ -50,6 +53,10 @@ export function Sidebar() {
             </Link>
           );
         })}
+        <Link href="/console/accessibility" className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm ${path === "/console/accessibility" ? "bg-[#143226] text-[#3dcc9a]" : "text-[#8aa89a] hover:bg-[#10241c]"}`}><Gauge className="h-4 w-4" />Accessibility</Link>
+        <Link href="/console/copilot" className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm ${path === "/console/copilot" ? "bg-[#143226] text-[#3dcc9a]" : "text-[#8aa89a] hover:bg-[#10241c]"}`}><Bot className="h-4 w-4" />AI copilot</Link>
+        <Link href="/console/deliveries" className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm ${path === "/console/deliveries" ? "bg-[#143226] text-[#3dcc9a]" : "text-[#8aa89a] hover:bg-[#10241c]"}`}><Truck className="h-4 w-4" />Deliveries</Link>
+        <Link href="/console/health" className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm ${path === "/console/health" ? "bg-[#143226] text-[#3dcc9a]" : "text-[#8aa89a] hover:bg-[#10241c]"}`}><HeartPulse className="h-4 w-4" />System health</Link>
       </nav>
     </aside>
   );

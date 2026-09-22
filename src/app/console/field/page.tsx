@@ -3,6 +3,7 @@
 import { DISTRICTS } from "@/lib/ner-data";
 import { useStore } from "@/lib/store";
 import type { Incident, IncidentType, RiskLevel } from "@/lib/types";
+import { api } from "@/lib/api";
 import { useState } from "react";
 
 export default function FieldPage() {
@@ -10,7 +11,7 @@ export default function FieldPage() {
   const [offline, setOffline] = useState(true);
   const [photo, setPhoto] = useState<string>();
 
-  function submit(e: React.FormEvent<HTMLFormElement>) {
+  async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     const district = DISTRICTS.find((d) => d.id === fd.get("district"))!;
@@ -19,8 +20,9 @@ export default function FieldPage() {
       type: fd.get("type") as IncidentType,
       title: String(fd.get("title")),
       districtId: district.id,
-      lat: district.lat + (Math.random() - 0.5) * 0.08,
-      lng: district.lng + (Math.random() - 0.5) * 0.08,
+      // A report with no device coordinate is district-level, not a fabricated point.
+      lat: district.lat,
+      lng: district.lng,
       severity: fd.get("severity") as RiskLevel,
       description: String(fd.get("description")),
       photoDataUrl: photo,
@@ -28,7 +30,17 @@ export default function FieldPage() {
       at: new Date().toISOString(),
       synced: !offline,
     };
-            addIncident(inc, offline);
+    if (offline) {
+      addIncident(inc, true);
+    } else {
+      try {
+        const result = await api<{ incident: Incident }>("/incidents", { method: "POST", body: JSON.stringify(inc) });
+        addIncident(result.incident);
+      } catch (error) {
+        alert(error instanceof Error ? error.message : "Unable to submit incident");
+        return;
+      }
+    }
     e.currentTarget.reset();
     setPhoto(undefined);
   }
@@ -37,7 +49,7 @@ export default function FieldPage() {
     <div className="grid gap-4 lg:grid-cols-2">
       <form className="card space-y-3 p-5" onSubmit={submit}>
         <h2 className="text-lg font-medium">Geo-tagged field report</h2>
-        <p className="text-sm text-[#8aa89a]">Works offline. Queue syncs when the officer reconnects.</p>
+        <p className="text-sm text-[#8aa89a]">Demo mode: reports without device GPS use the selected district centroid. Offline reports remain local until submitted.</p>
         <input name="title" required placeholder="Incident title" className="w-full rounded-lg border border-[#1c3a32] bg-[#0d1f1a] p-2 text-sm" />
         <textarea name="description" required placeholder="What is blocking movement?" className="w-full rounded-lg border border-[#1c3a32] bg-[#0d1f1a] p-2 text-sm" />
         <div className="grid grid-cols-2 gap-3">
