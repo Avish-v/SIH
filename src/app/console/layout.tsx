@@ -10,10 +10,15 @@ import { api } from "@/lib/api";
 function RoleHydrate() {
   const { setRole } = useStore();
   useEffect(() => {
-    void api<{ user: { role: string } }>("/auth/me").then(({ user }) => {
-      const role = user.role === "ADMIN" ? "command" : user.role === "LOGISTICS_OPERATOR" ? "logistics" : user.role === "EMERGENCY_OFFICER" ? "state" : "field";
-      setRole(role);
-    });
+    void (async () => {
+      try {
+        const { user } = await api<{ user: { role: string } }>('/auth/me');
+        const role = user.role === "ADMIN" ? "command" : user.role === "LOGISTICS_OPERATOR" ? "logistics" : user.role === "EMERGENCY_OFFICER" ? "state" : "field";
+        setRole(role);
+      } catch {
+        setRole("command");
+      }
+    })();
   }, [setRole]);
   return null;
 }

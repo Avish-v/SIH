@@ -4,11 +4,8 @@ import { LANG_LABEL, STRINGS } from "@/lib/i18n";
 import type { Lang } from "@/lib/types";
 import { useStore } from "@/lib/store";
 import { WifiOff } from "lucide-react";
-import { api } from "@/lib/api";
-import { useRouter } from "next/navigation";
 
 export function Topbar() {
-  const router = useRouter();
   const { lang, setLang, role, hour, offlineCount, syncOffline } = useStore();
   const t = STRINGS[lang];
   return (
@@ -36,12 +33,6 @@ export function Topbar() {
         >
           <WifiOff className="h-3 w-3" />
           {t.sync} {offlineCount ? `(${offlineCount})` : ""}
-        </button>
-        <button
-          onClick={() => void api("/auth/logout", { method: "DELETE" }).then(() => router.push("/"))}
-          className="rounded-full border border-[#1c3a32] px-3 py-1 text-xs hover:border-[#3dcc9a]"
-        >
-          Sign out
         </button>
       </div>
     </header>
