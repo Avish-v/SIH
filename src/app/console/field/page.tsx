@@ -10,6 +10,7 @@ export default function FieldPage() {
   const { addIncident, incidents } = useStore();
   const [offline, setOffline] = useState(true);
   const [photo, setPhoto] = useState<string>();
+  const [photoFile, setPhotoFile] = useState<File>();
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -34,7 +35,17 @@ export default function FieldPage() {
       addIncident(inc, true);
     } else {
       try {
-        const result = await api<{ incident: Incident }>("/incidents", { method: "POST", body: JSON.stringify(inc) });
+        const upload = new FormData();
+        upload.append("title", inc.title);
+        upload.append("description", inc.description);
+        upload.append("districtId", inc.districtId);
+        upload.append("type", inc.type);
+        upload.append("severity", inc.severity);
+        upload.append("reporter", inc.reporter);
+        upload.append("lat", String(inc.lat));
+        upload.append("lng", String(inc.lng));
+        if (photoFile) upload.append("photo", photoFile);
+        const result = await api<{ incident: Incident }>("/incidents/upload", { method: "POST", body: upload });
         addIncident(result.incident);
       } catch (error) {
         alert(error instanceof Error ? error.message : "Unable to submit incident");
@@ -43,6 +54,7 @@ export default function FieldPage() {
     }
     e.currentTarget.reset();
     setPhoto(undefined);
+    setPhotoFile(undefined);
   }
 
   return (
@@ -76,6 +88,7 @@ export default function FieldPage() {
           onChange={(e) => {
             const f = e.target.files?.[0];
             if (!f) return;
+            setPhotoFile(f);
             const r = new FileReader();
             r.onload = () => setPhoto(String(r.result));
             r.readAsDataURL(f);

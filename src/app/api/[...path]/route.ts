@@ -5,6 +5,17 @@ import { CORRIDORS, DISTRICTS } from "@/lib/ner-data";
 
 const json = (data: unknown, status = 200) => NextResponse.json(data, { status, headers: { "Cache-Control": "no-store" } });
 async function body(request: NextRequest) { try { return await request.json() as Record<string, unknown>; } catch { return {}; } }
+async function multipartBody(request: NextRequest) {
+  const form = await request.formData();
+  const photo = form.get("photo");
+  if (photo instanceof File) {
+    if (!photo.type.startsWith("image/")) throw new Error("photo must be an image file");
+    if (photo.size > 2_000_000) throw new Error("photo must be smaller than 2 MB");
+    const photoDataUrl = `data:${photo.type};base64,${Buffer.from(await photo.arrayBuffer()).toString("base64")}`;
+    return { ...Object.fromEntries(form.entries()), photoDataUrl } as Record<string, unknown>;
+  }
+  return Object.fromEntries(form.entries()) as Record<string, unknown>;
+}
 const operationalRoles = new Set(["ADMIN", "LOGISTICS_OPERATOR", "EMERGENCY_OFFICER"]);
 function systemHealth() {
   const now = new Date().toISOString();
@@ -57,7 +68,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   const path = (await params).path.join("/");
-  const input = await body(request);
+  const input = path === "incidents/upload" ? await multipartBody(request) : await body(request);
   try {
     if (path === "auth/login" || path === "auth/register") {
       const user = path === "auth/login"
@@ -74,7 +85,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (path === "ai/flood-risk") return json(aiRisk(input, "flood"));
     if (path === "ai/landslide-risk") return json(aiRisk(input, "landslide"));
     if (path === "ai/route-risk") return json({ ...DEMO_META, scores: currentScores().scores });
-    if (path === "incidents") return json({ ...DEMO_META, incident: createIncident(input) }, 201);
+    if (path === "incidents" || path === "incidents/upload") return json({ ...DEMO_META, incident: createIncident(input) }, 201);
     if (path === "deliveries") {
       if (!operationalRoles.has(user.role)) return json({ detail: "Operational role required" }, 403);
       return json({ ...DEMO_META, mode: "SIMULATION", delivery: createDelivery(input) }, 201);
